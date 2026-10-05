@@ -1,0 +1,417 @@
+q1:
+
+import java.util.*;
+
+class Solution {
+    public int longestSubarray(int[] arr, int k) {
+        int n = arr.length;
+        int sum = 0;
+        int max = 0;
+
+        HashMap<Integer, Integer> map = new HashMap<>();
+
+        for (int i = 0; i < n; i++) {
+            sum += arr[i];
+
+            if (sum == k) {
+                max = i + 1;
+            }
+
+            if (map.containsKey(sum - k)) {
+                max = Math.max(max, i - map.get(sum - k));
+            }
+
+            if (!map.containsKey(sum)) {
+                map.put(sum, i);
+            }
+        }
+
+        return max;
+    }
+}
+
+q2:
+
+import java.util.*;
+
+class Solution {
+    public String minWindow(String s, String t) {
+        if (s.length() < t.length()) {
+            return "";
+        }
+
+        HashMap<Character, Integer> map = new HashMap<>();
+
+        for (char c : t.toCharArray()) {
+            map.put(c, map.getOrDefault(c, 0) + 1);
+        }
+
+        int l = 0;
+        int count = 0;
+        int start = 0;
+        int min = Integer.MAX_VALUE;
+
+        HashMap<Character, Integer> window = new HashMap<>();
+
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+
+            window.put(c, window.getOrDefault(c, 0) + 1);
+
+            if (map.containsKey(c) && window.get(c) <= map.get(c)) {
+                count++;
+            }
+
+            while (count == t.length()) {
+                if (i - l + 1 < min) {
+                    min = i - l + 1;
+                    start = l;
+                }
+
+                char ch = s.charAt(l);
+                window.put(ch, window.get(ch) - 1);
+
+                if (map.containsKey(ch) && window.get(ch) < map.get(ch)) {
+                    count--;
+                }
+
+                l++;
+            }
+        }
+
+        if (min == Integer.MAX_VALUE) {
+            return "";
+        }
+
+        return s.substring(start, start + min);
+    }
+}
+
+q3:
+
+import java.util.*;
+
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        if (intervals.length <= 1) {
+            return intervals;
+        }
+
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+
+        ArrayList<int[]> list = new ArrayList<>();
+
+        int start = intervals[0][0];
+        int end = intervals[0][1];
+
+        for (int i = 1; i < intervals.length; i++) {
+            if (intervals[i][0] <= end) {
+                end = Math.max(end, intervals[i][1]);
+            } else {
+                list.add(new int[]{start, end});
+
+                start = intervals[i][0];
+                end = intervals[i][1];
+            }
+        }
+
+        list.add(new int[]{start, end});
+
+        return list.toArray(new int[list.size()][]);
+    }
+}
+
+q4:
+
+import java.util.*;
+
+class KthLargest {
+    PriorityQueue<Integer> pq;
+    int k;
+
+    public KthLargest(int k, int[] nums) {
+        this.k = k;
+        pq = new PriorityQueue<>();
+
+        for (int i : nums) {
+            add(i);
+        }
+    }
+
+    public int add(int val) {
+        pq.offer(val);
+
+        if (pq.size() > k) {
+            pq.poll();
+        }
+
+        return pq.peek();
+    }
+}
+
+q5:
+class Solution {
+    public void removeLoop(Node head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+
+        Node slow = head;
+        Node fast = head;
+
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+
+            if (slow == fast) {
+                break;
+            }
+        }
+
+        if (slow != fast) {
+            return;
+        }
+
+        slow = head;
+
+        if (slow == fast) {
+            while (fast.next != slow) {
+                fast = fast.next;
+            }
+
+            fast.next = null;
+            return;
+        }
+
+        while (slow.next != fast.next) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        fast.next = null;
+    }
+}
+
+q6:
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) {
+            return root;
+        }
+
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+
+        if (left != null && right != null) {
+            return root;
+        }
+
+        if (left != null) {
+            return left;
+        }
+
+        return right;
+    }
+}
+
+q7:
+import java.util.*;
+
+class Solution {
+    public int shortestPathBinaryMatrix(int[][] grid) {
+        int n = grid.length;
+
+        if (grid[0][0] == 1 || grid[n - 1][n - 1] == 1) {
+            return -1;
+        }
+
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{0, 0, 1});
+
+        grid[0][0] = 1;
+
+        int[][] dir = {
+            {-1, -1},
+            {-1, 0},
+            {-1, 1},
+            {0, -1},
+            {0, 1},
+            {1, -1},
+            {1, 0},
+            {1, 1}
+        };
+
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+
+            int r = cur[0];
+            int c = cur[1];
+            int dist = cur[2];
+
+            if (r == n - 1 && c == n - 1) {
+                return dist;
+            }
+
+            for (int[] d : dir) {
+                int nr = r + d[0];
+                int nc = c + d[1];
+
+                if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc] == 0) {
+                    grid[nr][nc] = 1;
+                    queue.offer(new int[]{nr, nc, dist + 1});
+                }
+            }
+        }
+
+        return -1;
+    }
+}
+
+q8:
+
+import java.util.*;
+
+class Solution {
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        ArrayList<Integer>[] graph = new ArrayList[numCourses];
+
+        for (int i = 0; i < numCourses; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        int[] indegree = new int[numCourses];
+
+        for (int[] p : prerequisites) {
+            graph[p[1]].add(p[0]);
+            indegree[p[0]]++;
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        int[] ans = new int[numCourses];
+        int index = 0;
+
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+
+            ans[index++] = cur;
+
+            for (int next : graph[cur]) {
+                indegree[next]--;
+
+                if (indegree[next] == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+
+        if (index != numCourses) {
+            return new int[0];
+        }
+
+        return ans;
+    }
+}
+
+q9:
+
+import java.util.*;
+
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+
+        Arrays.fill(dp, amount + 1);
+
+        dp[0] = 0;
+
+        for (int i = 1; i <= amount; i++) {
+            for (int coin : coins) {
+                if (coin <= i) {
+                    dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+                }
+            }
+        }
+
+        if (dp[amount] == amount + 1) {
+            return -1;
+        }
+
+        return dp[amount];
+    }
+}
+
+q10:
+
+class SegmentTree {
+    int[] tree;
+    int n;
+
+    SegmentTree(int[] arr) {
+        n = arr.length;
+        tree = new int[4 * n];
+        build(arr, 1, 0, n - 1);
+    }
+
+    void build(int[] arr, int node, int start, int end) {
+        if (start == end) {
+            tree[node] = arr[start];
+            return;
+        }
+
+        int mid = (start + end) / 2;
+
+        build(arr, 2 * node, start, mid);
+        build(arr, 2 * node + 1, mid + 1, end);
+
+        tree[node] = Math.max(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    void update(int index, int value) {
+        update(1, 0, n - 1, index, value);
+    }
+
+    void update(int node, int start, int end, int index, int value) {
+        if (start == end) {
+            tree[node] = value;
+            return;
+        }
+
+        int mid = (start + end) / 2;
+
+        if (index <= mid) {
+            update(2 * node, start, mid, index, value);
+        } else {
+            update(2 * node + 1, mid + 1, end, index, value);
+        }
+
+        tree[node] = Math.max(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    int query(int left, int right) {
+        return query(1, 0, n - 1, left, right);
+    }
+
+    int query(int node, int start, int end, int left, int right) {
+        if (right < start || end < left) {
+            return Integer.MIN_VALUE;
+        }
+
+        if (left <= start && end <= right) {
+            return tree[node];
+        }
+
+        int mid = (start + end) / 2;
+
+        int a = query(2 * node, start, mid, left, right);
+        int b = query(2 * node + 1, mid + 1, end, left, right);
+
+        return Math.max(a, b);
+    }
+}
